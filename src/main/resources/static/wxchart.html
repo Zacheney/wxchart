@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>微信机器人登陆</title>
+</head>
+<body>
+<div id="main"></div>
+
+<script src="jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+
+        $.ajax({
+            type : "get",
+            url : "/wxLogin",
+            dataType : "json",
+            contentType : "application/json",
+            data : "",
+            timeout : 60000,
+            global : false,
+            success : queryWxLoginSuccess
+        });
+
+        function queryWxLoginSuccess(data) {
+            var qcCodeEndUrl = data.data;
+            var html = `<img src= "https://login.weixin.qq.com/qrcode/`+qcCodeEndUrl+`" />`;
+            $("#main").append(html);
+            isLogin(qcCodeEndUrl);
+            }
+
+
+            function isLogin(qcCodeEndUrl) {
+                $.ajax({
+                    type : "get",
+                    url : "/isLogin?qcCodeEndUrl="+qcCodeEndUrl,
+                    dataType : "json",
+                    contentType : "application/json",
+                    data : "",
+                    timeout : 60000,
+                    success : function (data) {
+                        if(data.code=="200"){
+                            alert("登陆成功！")
+                            return;
+                        }else {
+                            isLogin(qcCodeEndUrl);
+                        }
+                    }
+                });
+            }
+
+
+    })
+
+
+</script>
+
+</body>
+</html>
+
+

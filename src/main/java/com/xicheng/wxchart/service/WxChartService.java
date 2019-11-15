@@ -58,11 +58,20 @@ public class WxChartService {
         basequest.put("Skey",skey);
         basequest.put("DeviceID","e525180873419679");
 
-        requestbody.put("BaseRequest", JSON.toJSONString(basequest));
+        requestbody.put("'BaseRequest'", JSON.toJSONString(basequest));
         HttpClientRes httpClientRes = HttpClientUtil.doPost(wxinitUrl, header, requestbody);
         String content = httpClientRes.getContent();
         System.out.println(content);
 
+    }
+
+    public static void main(String[] args) {
+        HashMap<String, String> basequest = new HashMap<>();
+        basequest.put("Uin","232312");
+        basequest.put("Sid","312312");
+        basequest.put("Skey","312313");
+        basequest.put("DeviceID","e525180873419679");
+        System.out.println(JSON.toJSONString(basequest));
     }
 
 }

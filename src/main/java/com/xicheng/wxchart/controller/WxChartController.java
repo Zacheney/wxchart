@@ -17,11 +17,10 @@ public class WxChartController {
     private  WxChartService wxChartService;
 
     @RequestMapping("wxLogin")
-    public String wxChart() throws Exception{
+    public ResultVO wxChart() throws Exception{
             //生成二维码地址
         String qcCodeEndUrl = wxChartService.getQcCode();
-        System.out.println(qcCodeEndUrl);
-        return String.format("<img src= 'https://login.weixin.qq.com/qrcode/%s' />",qcCodeEndUrl);
+        return new ResultVO("200",qcCodeEndUrl);
     }
 
 
@@ -38,23 +37,22 @@ public class WxChartController {
             return new ResultVO("201",imgData);
         }else{
             String loginEndUrl = contents[1].split("\"")[1].substring(56);
+            //开启一条新线程去开始
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        wxChartService.excute(loginEndUrl);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
             return new ResultVO("200",loginEndUrl);
         }
     }
 
 
-    @RequestMapping("/wxCheck/{code}")
-    public void wx(@PathVariable("code")String code) throws Exception {
-        ResultVO  login = null;
-        for (;;){
-             login = isLogin(code);
-            System.out.println(login.getData());
-            if(login.getCode().equals("200")){
-                break;
-            }
-        }
-        wxChartService.excute((String)login.getData());
-    }
 
 
 }
