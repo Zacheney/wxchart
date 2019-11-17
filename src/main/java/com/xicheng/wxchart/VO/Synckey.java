@@ -1,12 +1,16 @@
 package com.xicheng.wxchart.VO;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.util.List;
 
 public class Synckey {
 
+    @JSONField(name = "Count")
     private  Integer Count;
 
-    private List<SyncKV> syncKVS;
+    @JSONField(name = "List")
+    private List<SyncKV> List;
 
 
     public Integer getCount() {
@@ -17,11 +21,11 @@ public class Synckey {
         Count = count;
     }
 
-    public List<SyncKV> getSyncKVS() {
-        return syncKVS;
+    public java.util.List<SyncKV> getList() {
+        return List;
     }
 
-    public void setSyncKVS(List<SyncKV> syncKVS) {
-        this.syncKVS = syncKVS;
+    public void setList(java.util.List<SyncKV> list) {
+        List = list;
     }
 }

@@ -1,24 +1,29 @@
 package com.xicheng.wxchart.VO;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class SyncKV {
 
-    private  String Key;
+    @JSONField(name = "Key")
+    private  Integer Key;
 
-    private  String Val;
 
-    public String getKey() {
+    @JSONField(name = "Val")
+    private  Integer Val;
+
+    public Integer getKey() {
         return Key;
     }
 
-    public void setKey(String key) {
+    public void setKey(Integer key) {
         Key = key;
     }
 
-    public String getVal() {
+    public Integer getVal() {
         return Val;
     }
 
-    public void setVal(String val) {
+    public void setVal(Integer val) {
         Val = val;
     }
 }
