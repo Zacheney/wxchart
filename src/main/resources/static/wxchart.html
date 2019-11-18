@@ -7,6 +7,13 @@
 <body>
 <div id="main"></div>
 
+
+<div id="contacts" >
+
+
+    <button onclick="sub()" value="提交" /><br />
+</div>
+
 <script src="jquery.min.js"></script>
 <script type="text/javascript">
     $(function(){
@@ -21,6 +28,9 @@
             global : false,
             success : queryWxLoginSuccess
         });
+
+
+
 
         function queryWxLoginSuccess(data) {
             var qcCodeEndUrl = data.data;
@@ -41,6 +51,7 @@
                     success : function (data) {
                         if(data.code=="200"){
                             alert("登陆成功！")
+                            getContact();
                             return;
                         }else {
                             isLogin(qcCodeEndUrl);
@@ -50,8 +61,62 @@
             }
 
 
+            function getContact() {
+
+                $.ajax({
+                    type : "get",
+                    url : "/getContact",
+                    dataType : "json",
+                    contentType : "application/json",
+                    data : "",
+                    timeout : 60000,
+                    global : false,
+                    success : function (data) {
+                        if(data.code=="200"){
+                            var contact =  data.data;
+                            var html ="";
+                            for(var i in contact) {
+                                 html += (contact[i].remarkName == "" ? contact[i].nickName : contact[i].remarkName) + `:<input type="checkbox"  name="robotResultUserName" value="` + contact[i].userName + `"/><br>`;
+                            }
+                            $("#contacts").prepend(html);
+                                return;
+                        }else{
+                            setTimeout(getContact,3*1000);
+                        }
+                    }
+                });
+
+            }
+
+
+
+
     })
 
+    function sub() {
+        var roboArray = [];
+        $("input[name='robotResultUserName']:checked").each(function(i){//把所有被选中的复选框的值存入数组
+            roboArray[i] =$(this).val();
+        });
+        var item =  {"robotUserName" :  roboArray};
+        $.ajax({
+            type : "post",
+            traditional:true,
+            url : "/setRobotUserName",
+            dataType : "json",
+            contentType : "application/json",
+            data : item,
+            timeout : 60000,
+            success : function (data) {
+                if(data=="200"){
+                    alert("设置成功")
+                }else{
+                    alert("设置失败")
+                }
+            }
+        });
+
+    }
 
 </script>
 

@@ -2,6 +2,8 @@ package com.xicheng.wxchart.VO;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import java.util.List;
+
 public class ContentRes {
 
 
@@ -10,6 +12,15 @@ public class ContentRes {
 
     private User User;
 
+    private List<Contact> ContactList;
+
+    public List<Contact> getContactList() {
+        return ContactList;
+    }
+
+    public void setContactList(List<Contact> contactList) {
+        ContactList = contactList;
+    }
 
     public com.xicheng.wxchart.VO.Synckey getSynckey() {
         return Synckey;

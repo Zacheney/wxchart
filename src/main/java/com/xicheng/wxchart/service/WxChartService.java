@@ -9,6 +9,7 @@ import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,46 @@ public class WxChartService {
 
     private WebSyncRes res = new WebSyncRes();
 
+    //登陆的人的username
     private String userName;
+
+    private List<Contact> contactList;
+
+    public List<Contact> getContactList() {
+        return contactList;
+    }
+
+    //机器人自动回复的username
+    private List<String> robotResultUserNameList = new ArrayList<>();
+
+
+    public WebSyncRes getRes() {
+        return res;
+    }
+
+    public void setRes(WebSyncRes res) {
+        this.res = res;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setContactList(List<Contact> contactList) {
+        this.contactList = contactList;
+    }
+
+    public List<String> getRobotResultUserNameList() {
+        return robotResultUserNameList;
+    }
+
+    public void setRobotResultUserNameList(List<String> robotResultUserNameList) {
+        this.robotResultUserNameList = robotResultUserNameList;
+    }
 
     public String getQcCode() throws Exception {
         String url = "https://login.wx.qq.com/jslogin?appid=wx782c26e4c19acffb&redirect_uri=https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage&fun=new&lang=zh_CN&_=1573629278255";
@@ -80,7 +120,14 @@ public class WxChartService {
                         System.out.println(webSyncMsgRes.getFromUserName()+"发送了一条信息给"+webSyncMsgRes.getToUserName());
                         //收到的信息
                         String from =  webSyncMsgRes.getFromUserName();
-                        if((!userName.equals(from))&&(!from.startsWith("@@"))){
+                        boolean canAutoResult = false;
+                        for (String robotResultUserName : robotResultUserNameList) {
+                            if(from.equals(robotResultUserName)){
+                                canAutoResult = true;
+                                break;
+                            }
+                        }
+                        if((!userName.equals(from))&&canAutoResult){
                             String msg = webSyncMsgRes.getContent();
                             new Thread(new Runnable() {
                                 @Override
@@ -120,6 +167,7 @@ public class WxChartService {
         String content = httpClientRes.getContent();
 //        System.out.println(content);
         ContentRes contentRes = JSON.parseObject(content, ContentRes.class);
+        contactList = contentRes.getContactList();
         userName = contentRes.getUser().getUserName();
         System.out.println("username是"+userName);
         res.setSyncCheckKey(contentRes.getSynckey());

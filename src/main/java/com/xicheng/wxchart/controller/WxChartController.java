@@ -1,14 +1,16 @@
 package com.xicheng.wxchart.controller;
 
+import com.xicheng.wxchart.VO.Contact;
 import com.xicheng.wxchart.service.WxChartService;
 import com.xicheng.wxchart.util.ResultVO;
 import jdk.nashorn.internal.objects.annotations.Where;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 public class WxChartController {
@@ -50,6 +52,25 @@ public class WxChartController {
             }).start();
             return new ResultVO("200",loginEndUrl);
         }
+    }
+
+    @RequestMapping("getContact")
+    public ResultVO getContact(){
+        List<Contact> contactList = wxChartService.getContactList();
+        if(contactList!=null&&contactList.size()>0){
+            return new ResultVO("200",contactList);
+        }
+        return new ResultVO("201",null);
+    }
+
+
+    @RequestMapping("setRobotUserName")
+    public ResultVO setRobotUserName(@RequestParam("robotUserName") String[] robotUserName){
+        if(robotUserName!=null&&robotUserName.length>=0){
+            wxChartService.setRobotResultUserNameList(Arrays.asList(robotUserName));
+            return new ResultVO("200",null);
+        }
+        return new ResultVO("201",null);
     }
 
 
