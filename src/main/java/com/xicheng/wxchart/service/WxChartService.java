@@ -195,6 +195,11 @@ public class WxChartService {
         HttpClientRes httpClientRes = HttpClientUtil.doGet(syncCheckUrl, header, params);
         String content = httpClientRes.getContent();
         System.out.println(content);
+        int retcode =Integer.parseInt(content.split("\"")[1]) ;
+        if(retcode!=0){
+            System.out.println("已经注销登陆，线程结束结束！");
+            Thread.currentThread().stop();
+        }
         String status = content.split("\"")[3];
         return Integer.parseInt(status);
 
