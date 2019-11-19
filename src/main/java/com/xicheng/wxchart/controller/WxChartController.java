@@ -65,9 +65,10 @@ public class WxChartController {
 
 
     @RequestMapping("setRobotUserName")
-    public ResultVO setRobotUserName(@RequestParam("robotUserName") String[] robotUserName){
+    public ResultVO setRobotUserName(@RequestBody String[] robotUserName){
         if(robotUserName!=null&&robotUserName.length>=0){
             wxChartService.setRobotResultUserNameList(Arrays.asList(robotUserName));
+            System.out.println("--------"+wxChartService.getRobotResultUserNameList()+"---------");
             return new ResultVO("200",null);
         }
         return new ResultVO("201",null);
