@@ -1,6 +1,7 @@
 package com.xicheng.wxchart.util;
 
 import org.apache.http.Consts;
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -281,13 +282,14 @@ public class HttpClientUtil {
         // 执行请求
         httpResponse = httpClient.execute(httpMethod);
 
+
         // 获取返回结果
         if (httpResponse != null && httpResponse.getStatusLine() != null) {
             String content = "";
             if (httpResponse.getEntity() != null) {
                 content = EntityUtils.toString(httpResponse.getEntity(), ENCODING);
             }
-            return new HttpClientRes(httpResponse.getStatusLine().getStatusCode(), content);
+            return new HttpClientRes(httpResponse.getStatusLine().getStatusCode(), content,httpResponse.getHeaders("Set-Cookie"));
         }
         return new HttpClientRes(HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }

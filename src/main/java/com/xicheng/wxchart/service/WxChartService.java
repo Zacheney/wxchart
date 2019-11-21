@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.xicheng.wxchart.VO.*;
 import com.xicheng.wxchart.util.HttpClientRes;
 import com.xicheng.wxchart.util.HttpClientUtil;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.NameValuePair;
 import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Service;
@@ -19,19 +22,25 @@ public class WxChartService {
 
     private WebSyncRes res = new WebSyncRes();
 
+    //存放cookie
+    private String cookieValue = "";
+
     //登陆的人的username
     private String userName;
 
     private List<Contact> contactList;
 
-    public List<Contact> getContactList() {
-        return contactList;
-    }
+
+
+
 
     //机器人自动回复的username
     private List<String> robotResultUserNameList = new ArrayList<>();
 
 
+    public List<Contact> getContactList() {
+        return contactList;
+    }
     public WebSyncRes getRes() {
         return res;
     }
@@ -61,9 +70,10 @@ public class WxChartService {
     }
 
     public String getQcCode() throws Exception {
+        cookieValue += "mm_lang=zh_CN;";
         String url = "https://login.wx.qq.com/jslogin?appid=wx782c26e4c19acffb&redirect_uri=https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage&fun=new&lang=zh_CN&_=1573629278255";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=306419002; pgv_pvi=6773444608; RK=sw5lviMBEL; ptcz=1ffcd7fe91dec152cdff8657f6a8f4143c18f40c7209f92b3c836fdb80c33a05; pac_uid=1_1836810134; eas_sid=j1J5y45855m1k3x3P3q8Y1R3v0; webwxuvid=ea91688edb313b3eb817f24de9b4b2647cac46127639cc2a772b8febc66b8bc246de4c221750e662673a0d33c9abde8b; _ga=GA1.2.746271150.1558590289; ied_qq=o1836810134; tvfe_boss_uuid=d2c01d22a47008d3; o_cookie=1835901302; luin=o1836810134; lskey=0001000094d493a4b8af70c1c92ae045d7e6374683348a7073e2d61bdce69dc09abc34ce7917e1607f1ea1c4; ptui_loginuin=1836810134@qq.com; wxuin=1020632462; pgv_info=ssid=s2293734787; wdqyqqcomrouteLine=a20190814downloadpc_index_newsdetail_index_a20190814downloadpc_a20190814downloadpc; mm_lang=zh_CN; webwx_auth_ticket=CIsBEPGzwxwagAESLyzAV5PtYG8WDB7wjxpQqk7aV+oIOD8iwVbUaLOz0OO5Y3U0knGA++cKpyS+aw1eyqCMASOXAC2Qq6mUvVhOAwDH3OIiDaKAxoiJ2wTzGuoGFpVb0M8ZstFuALBrONNLqdZmvpff/aphM0FWiq9di0drxquFNzI0YMmYKSTgEA==; wxloadtime=1573741276_expired; wxpluginkey=1573740005");
+        header.put("Cookie","mm_lang=zh_CN");
         HttpClientRes httpClientRes = HttpClientUtil.doGet(url, header, null);
         String content = httpClientRes.getContent();
         String qcCodeUrl = content.split("\"")[1];
@@ -74,7 +84,7 @@ public class WxChartService {
     public String isLogin(String qcCodeEndUrl) throws Exception {
         String isLoginUrl = "https://login.wx.qq.com/cgi-bin/mmwebwx-bin/login?loginicon=true&uuid="+qcCodeEndUrl+"&tip=0&r=-1670748235&_=157362863";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=306419002; pgv_pvi=6773444608; RK=sw5lviMBEL; ptcz=1ffcd7fe91dec152cdff8657f6a8f4143c18f40c7209f92b3c836fdb80c33a05; pac_uid=1_1836810134; eas_sid=j1J5y45855m1k3x3P3q8Y1R3v0; webwxuvid=ea91688edb313b3eb817f24de9b4b2647cac46127639cc2a772b8febc66b8bc246de4c221750e662673a0d33c9abde8b; _ga=GA1.2.746271150.1558590289; ied_qq=o1836810134; tvfe_boss_uuid=d2c01d22a47008d3; o_cookie=1835901302; luin=o1836810134; lskey=0001000094d493a4b8af70c1c92ae045d7e6374683348a7073e2d61bdce69dc09abc34ce7917e1607f1ea1c4; ptui_loginuin=1836810134@qq.com; wxuin=1020632462; pgv_info=ssid=s2293734787; wdqyqqcomrouteLine=a20190814downloadpc_index_newsdetail_index_a20190814downloadpc_a20190814downloadpc; mm_lang=zh_CN; webwx_auth_ticket=CIsBEPGzwxwagAESLyzAV5PtYG8WDB7wjxpQqk7aV+oIOD8iwVbUaLOz0OO5Y3U0knGA++cKpyS+aw1eyqCMASOXAC2Qq6mUvVhOAwDH3OIiDaKAxoiJ2wTzGuoGFpVb0M8ZstFuALBrONNLqdZmvpff/aphM0FWiq9di0drxquFNzI0YMmYKSTgEA==; wxloadtime=1573741276_expired; wxpluginkey=1573740005");
+        header.put("Cookie","mm_lang=zh_CN");
         HttpClientRes httpClientRes = HttpClientUtil.doGet(isLoginUrl, header, null);
         String content = httpClientRes.getContent();
         return content;
@@ -82,12 +92,20 @@ public class WxChartService {
 
 
     public void excute(String loginEndUrl) throws Exception {
+        cookieValue += "MM_WX_NOTIFY_STATE=1;MM_WX_SOUND_STATE=1;";
         String getSidAndSkeyUrl = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?"+loginEndUrl+"&fun=new&version=v2&lang=zh_CN";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=306419002; pgv_pvi=6773444608; RK=sw5lviMBEL; ptcz=1ffcd7fe91dec152cdff8657f6a8f4143c18f40c7209f92b3c836fdb80c33a05; pac_uid=1_1836810134; eas_sid=j1J5y45855m1k3x3P3q8Y1R3v0; webwxuvid=ea91688edb313b3eb817f24de9b4b2647cac46127639cc2a772b8febc66b8bc246de4c221750e662673a0d33c9abde8b; _ga=GA1.2.746271150.1558590289; ied_qq=o1836810134; tvfe_boss_uuid=d2c01d22a47008d3; o_cookie=1835901302; luin=o1836810134; lskey=0001000094d493a4b8af70c1c92ae045d7e6374683348a7073e2d61bdce69dc09abc34ce7917e1607f1ea1c4; ptui_loginuin=1836810134@qq.com; wxuin=1020632462; pgv_info=ssid=s2293734787; wdqyqqcomrouteLine=a20190814downloadpc_index_newsdetail_index_a20190814downloadpc_a20190814downloadpc; mm_lang=zh_CN; webwx_auth_ticket=CIsBEPGzwxwagAESLyzAV5PtYG8WDB7wjxpQqk7aV+oIOD8iwVbUaLOz0OO5Y3U0knGA++cKpyS+aw1eyqCMASOXAC2Qq6mUvVhOAwDH3OIiDaKAxoiJ2wTzGuoGFpVb0M8ZstFuALBrONNLqdZmvpff/aphM0FWiq9di0drxquFNzI0YMmYKSTgEA==; wxloadtime=1573741276_expired; wxpluginkey=1573740005");
+        header.put("Cookie","mm_lang=zh_CN; MM_WX_NOTIFY_STATE=1; MM_WX_SOUND_STATE=1");
         HttpClientRes httpClientRes = HttpClientUtil.doGet(getSidAndSkeyUrl, header, null);
         String content = httpClientRes.getContent();
         System.out.println(content);
+        Header[] setCookies = httpClientRes.getSetCookies();
+        for (Header setCookie : setCookies) {
+            HeaderElement[] elements = setCookie.getElements();
+           cookieValue += (elements[0].getName()+"="+elements[0].getValue()+";");
+
+        }
+        System.out.println("最终的cookie是："+cookieValue);
         String skey = content.split("<skey>|</skey>")[1];
         String sid = content.split("<wxsid>|</wxsid>")[1];
         String uin = content.split("<wxuin>|</wxuin>")[1];
@@ -128,7 +146,18 @@ public class WxChartService {
                             }
                         }
                         if((!userName.equals(from))&&canAutoResult){
-                            String msg = webSyncMsgRes.getContent();
+                            if(webSyncMsgRes.getContent().split("type=\"revokemsg\"&gt;").length>1)continue;
+                            String msgTmp = "";
+                            //群里的消息
+                            if(from.startsWith("@@")){
+                                String s = webSyncMsgRes.getContent().split("<br/>")[1];
+                                msgTmp = s.substring(0,s.length()-1);
+
+                            }else{
+                                msgTmp = webSyncMsgRes.getContent();
+                            }
+
+                            String msg = msgTmp;
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -152,7 +181,7 @@ public class WxChartService {
     private void wxinit(String sid, String skey,String uin) throws Exception {
         String wxinitUrl = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r=-1674625016&lang=zh_CN";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=6183515156; pgv_pvi=3814835200; RK=155lugMJWL; ptcz=59a0715d892f1b646e0c7dc445ddacd28fd47ce3594971683990db1e352e30c6; tvfe_boss_uuid=433d039493259004; webwxuvid=02b485cb75d54a02af2b3d8a2f0f63c280981906ed468ff1f827b6d54a1124a8dd0cfc06d2d27bc27cbc1fd6adc6508b; eas_sid=g1E536z3p5N9x3P0U2H8m683B7; uin_cookie=o1836810134; ied_qq=o1836810134; o_cookie=1836810134; pgv_si=s2394191872; ptisp=cnc; ptui_loginuin=1835901302@qq.com; uin=o1835901302; skey=@dxaPWH9bH; mm_lang=zh_CN; MM_WX_NOTIFY_STATE=1; MM_WX_SOUND_STATE=1; wxuin=1020632462; last_wxuin=1020632462; refreshTimes=2; wxpluginkey=1573880521; wxsid=rLX3bc9va7sL+Pe3; webwx_data_ticket=gScnwqTKQrt5qgfBYb8u81Gq; webwx_auth_ticket=CIsBEPu3s6MFGoABXzdbKqxXilP+tPFE7iGcIF8wQedEvrdSndRbxZQPY2mRAp97iKevsLhy9utjaqwSEJxrP3iLFGd/Ii4GwV0BR7gxVOqSMqETDSv+JZjRmIRyhop0Ksbaty4TkqxSYsaPu73ombIvjEaprhhsL228BtBjrzzU8kW79duXK+T2BGc=; login_frequency=1; wxloadtime=1573882861_expired");
+        header.put("Cookie",cookieValue);
         header.put("Content-Type","application/json");
         HashMap<String, Map<String,String>> requestbody = new HashMap<>();
         HashMap<String, String> basequest = new HashMap<>();
@@ -191,16 +220,20 @@ public class WxChartService {
         params.put("_","1573884077841");
         HashMap<String, String> header = new HashMap<>();
         System.out.println(JSON.toJSONString(params));
-        header.put("Cookie","pgv_pvid=6183515156; pgv_pvi=3814835200; RK=155lugMJWL; ptcz=59a0715d892f1b646e0c7dc445ddacd28fd47ce3594971683990db1e352e30c6; tvfe_boss_uuid=433d039493259004; webwxuvid=02b485cb75d54a02af2b3d8a2f0f63c280981906ed468ff1f827b6d54a1124a8dd0cfc06d2d27bc27cbc1fd6adc6508b; eas_sid=g1E536z3p5N9x3P0U2H8m683B7; uin_cookie=o1836810134; ied_qq=o1836810134; o_cookie=1836810134; pgv_si=s2394191872; ptisp=cnc; ptui_loginuin=1835901302@qq.com; uin=o1835901302; skey=@dxaPWH9bH; mm_lang=zh_CN; wxuin=1020632462; wxpluginkey=1573880521; wxsid=TJwgQ8//n6owhqhe; wxloadtime=1573884083; webwx_data_ticket=gScXl7xcC/ED0kay0/OZ8Xhn; webwx_auth_ticket=CIsBEKa3n4cDGoABmsQZSQvMbfNyCfslxToeqV8wQedEvrdSndRbxZQPY2mRAp97iKevsLhy9utjaqwSEJxrP3iLFGd/Ii4GwV0BR7gxVOqSMqETDSv+JZjRmIRyhop0Ksbaty4TkqxSYsaPu73ombIvjEaprhhsL228BtBjrzzU8kW79duXK+T2BGc=");
+        header.put("Cookie",cookieValue);
         HttpClientRes httpClientRes = HttpClientUtil.doGet(syncCheckUrl, header, params);
         String content = httpClientRes.getContent();
         System.out.println(content);
         int retcode =Integer.parseInt(content.split("\"")[1]) ;
-        if(retcode!=0){
+        String status = content.split("\"")[3];
+        if(retcode!=0 || status.equals("3")){
             System.out.println("已经注销登陆，线程结束结束！");
+            this.contactList = null;
+            this.robotResultUserNameList.clear();
+            this.cookieValue = "";
             Thread.currentThread().stop();
         }
-        String status = content.split("\"")[3];
+
         return Integer.parseInt(status);
 
 
@@ -209,7 +242,7 @@ public class WxChartService {
     public void webSync(String sid,String skey,String uin) throws Exception {
         String webSyncUrl = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsync?sid="+sid+"&skey="+skey+"&lang=zh_CN";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=6183515156; pgv_pvi=3814835200; RK=155lugMJWL; ptcz=59a0715d892f1b646e0c7dc445ddacd28fd47ce3594971683990db1e352e30c6; tvfe_boss_uuid=433d039493259004; webwxuvid=02b485cb75d54a02af2b3d8a2f0f63c280981906ed468ff1f827b6d54a1124a8dd0cfc06d2d27bc27cbc1fd6adc6508b; eas_sid=g1E536z3p5N9x3P0U2H8m683B7; uin_cookie=o1836810134; ied_qq=o1836810134; o_cookie=1836810134; pgv_si=s2394191872; ptisp=cnc; ptui_loginuin=1835901302@qq.com; uin=o1835901302; skey=@dxaPWH9bH; mm_lang=zh_CN; wxuin=1020632462; wxpluginkey=1573880521; wxsid=TJwgQ8//n6owhqhe; wxloadtime=1573884083; webwx_data_ticket=gScXl7xcC/ED0kay0/OZ8Xhn; webwx_auth_ticket=CIsBEKa3n4cDGoABmsQZSQvMbfNyCfslxToeqV8wQedEvrdSndRbxZQPY2mRAp97iKevsLhy9utjaqwSEJxrP3iLFGd/Ii4GwV0BR7gxVOqSMqETDSv+JZjRmIRyhop0Ksbaty4TkqxSYsaPu73ombIvjEaprhhsL228BtBjrzzU8kW79duXK+T2BGc=");
+        header.put("Cookie",cookieValue);
         header.put("Content-Type","application/json");
         HashMap<String, Object> requestbody = new HashMap<>();
         HashMap<String, String> basequest = new HashMap<>();
@@ -256,7 +289,7 @@ public class WxChartService {
 //        System.out.println(robotRes.getResults().get(0).getValues().getText());
         String sendMsgUrl = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsg?lang=zh_CN";
         HashMap<String, String> header = new HashMap<>();
-        header.put("Cookie","pgv_pvid=6183515156; pgv_pvi=3814835200; RK=155lugMJWL; ptcz=59a0715d892f1b646e0c7dc445ddacd28fd47ce3594971683990db1e352e30c6; tvfe_boss_uuid=433d039493259004; webwxuvid=02b485cb75d54a02af2b3d8a2f0f63c280981906ed468ff1f827b6d54a1124a8dd0cfc06d2d27bc27cbc1fd6adc6508b; eas_sid=g1E536z3p5N9x3P0U2H8m683B7; uin_cookie=o1836810134; ied_qq=o1836810134; o_cookie=1836810134; pgv_si=s2394191872; ptisp=cnc; ptui_loginuin=1835901302@qq.com; uin=o1835901302; skey=@dxaPWH9bH; mm_lang=zh_CN; MM_WX_NOTIFY_STATE=1; MM_WX_SOUND_STATE=1; wxuin=1020632462; last_wxuin=1020632462; refreshTimes=5; wxpluginkey=1573909681; wxsid=H62ADFZFxWUohbPF; webwx_data_ticket=gSdK3Uuz6VBfR3dNKP4SK4Ny; webwx_auth_ticket=CIsBEJq4/4MGGoABiXED/QuXe1Qdf3ekwYXigl8wQedEvrdSndRbxZQPY2mRAp97iKevsLhy9utjaqwSEJxrP3iLFGd/Ii4GwV0BR7gxVOqSMqETDSv+JZjRmIRyhop0Ksbaty4TkqxSYsaPu73ombIvjEaprhhsL228BtBjrzzU8kW79duXK+T2BGc=; login_frequency=2; wxloadtime=1573917105_expired");
+        header.put("Cookie",cookieValue);
         header.put("Content-Type","application/json");
         HashMap<String, Object> requestbody = new HashMap<>();
         HashMap<String, String> basequest = new HashMap<>();

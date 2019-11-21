@@ -1,5 +1,7 @@
 package com.xicheng.wxchart.util;
 
+import org.apache.http.Header;
+
 import java.io.Serializable;
 
 public class HttpClientRes implements Serializable {
@@ -9,13 +11,24 @@ public class HttpClientRes implements Serializable {
 
     private String content;
 
+    private Header[] setCookies;
+
+    public Header[] getSetCookies() {
+        return setCookies;
+    }
+
+    public void setSetCookies(Header[] setCookies) {
+        this.setCookies = setCookies;
+    }
+
     public HttpClientRes(int code) {
         this.code = code;
     }
 
-    public HttpClientRes(int code, String content) {
+    public HttpClientRes(int code, String content, Header[] setCookies) {
         this.code = code;
         this.content = content;
+        this.setCookies = setCookies;
     }
 
     public int getCode() {
