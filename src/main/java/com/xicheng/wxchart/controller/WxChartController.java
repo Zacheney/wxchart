@@ -3,12 +3,9 @@ package com.xicheng.wxchart.controller;
 import com.xicheng.wxchart.VO.Contact;
 import com.xicheng.wxchart.service.WxChartService;
 import com.xicheng.wxchart.util.ResultVO;
-import jdk.nashorn.internal.objects.annotations.Where;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,6 +50,8 @@ public class WxChartController {
             return new ResultVO("200",loginEndUrl);
         }
     }
+
+
 
     @RequestMapping("getContact")
     public ResultVO getContact(){
